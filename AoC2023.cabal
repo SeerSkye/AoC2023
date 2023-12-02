@@ -59,3 +59,10 @@ common day
 executable Day1
     import: day
     main-is: Day1.hs
+
+executable Day2
+    import: day
+    main-is: Day2.hs
+    build-depends:
+        attoparsec,
+        text
