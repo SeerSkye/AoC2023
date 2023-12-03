@@ -66,3 +66,9 @@ executable Day2
     build-depends:
         attoparsec,
         text
+
+executable Day3
+    import: day
+    main-is: Day3.hs
+    build-depends:
+        containers
