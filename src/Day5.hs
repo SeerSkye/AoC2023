@@ -153,6 +153,10 @@ makeSeedRanges [] = []
 makeSeedRanges (_:[]) = error "No corresponding number for seed range?"
 makeSeedRanges (start:len:rest) = (start, len): makeSeedRanges rest 
 
+-- After finishing I realize that this solution is actually flawed! It only actually finds
+-- the lowest location that's covered by a range, but it's technically possible for 
+-- the lowest location a seed can be planted in to be outside any range that the mapping effects!
+-- Fortunately this isn't the case for my input though...
 part2 :: Almanac -> Maybe Int
 part2 (Almanac seedList maps) = 
     listToMaybe $ mapMaybe (findSeedLocation seedRanges) (IM.toAscList mergedMap)
