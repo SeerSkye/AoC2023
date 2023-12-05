@@ -80,3 +80,11 @@ executable Day4
         attoparsec,
         text,
         containers
+
+executable Day5
+    import: day
+    main-is: Day5.hs
+    build-depends:
+        attoparsec,
+        text,
+        containers
