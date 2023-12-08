@@ -102,3 +102,11 @@ executable Day7
     build-depends:
         text,
         containers
+
+executable Day8
+    import: day
+    main-is: Day8.hs
+    build-depends:
+        text,
+        containers,
+        attoparsec
