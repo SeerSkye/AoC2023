@@ -32,7 +32,7 @@ main = do
     putStrLn $ "Part 2 Solution: " ++ show (part2 input)
 
 -- For fun, let's code an alternate solution where we find closed-form equations
--- for the formulas. We'll do this by "integrating" the constant function we eventually
+-- for the formulas. We'll do this by "integrating" the constant function we eventually find
 -- into a polynomial written in terms of falling factorial powers instead of normal powers
 -- (because normal powers don't play nice with the calculus of finite differences)
 
