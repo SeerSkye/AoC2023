@@ -114,3 +114,9 @@ executable Day8
 executable Day9
     import: day
     main-is: Day9.hs
+    
+executable Day10
+    import: day
+    main-is: Day10.hs
+    build-depends:
+        containers
