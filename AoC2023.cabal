@@ -120,3 +120,7 @@ executable Day10
     main-is: Day10.hs
     build-depends:
         containers
+
+executable Day11
+    import: day
+    main-is: Day11.hs
