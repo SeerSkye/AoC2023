@@ -122,12 +122,12 @@ choose n k
 
 -- So, from here, let's consider what happens if we add a single '.' to our
 -- string. The dot splits the string into two sections around itself, and then
--- for every way to split our groups around the '.' sum up the possible ways to
+-- for every way to split our groups around the '.' multiply the possible ways to
 -- put those groups on their respective sides
 
 -- Now we just have to deal with #s. When we see a #, we split the groups we're
 -- placing into the groups left of the #, the group that contains the #, and 
--- the groups to the right of the #, then we can add together the
+-- the groups to the right of the #, then we can multiply together the
 -- possible arrangements of the left and the right for every placement of the
 -- middle group over the #
 
