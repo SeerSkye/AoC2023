@@ -133,3 +133,11 @@ executable Day12
         attoparsec,
         text,
         MemoTrie
+
+executable Day13
+    import: day
+    main-is: Day13.hs
+    build-depends:
+        containers,
+        attoparsec,
+        text
