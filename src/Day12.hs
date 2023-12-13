@@ -1,14 +1,13 @@
 {-# Language OverloadedStrings #-}
 module Main where
-import Data.List(group, intercalate, (!?), inits, tails, zip3)
+import Data.List(group, intercalate, (!?), inits, tails)
 import Data.Attoparsec.Text(Parser, parseOnly, endOfLine, takeTill, skipSpace, decimal, sepBy)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T.IO
 import Data.Either(fromRight)
 import Data.Char(isSpace)
 import Data.Maybe(fromMaybe)
-import Control.Monad(forM)
-import Debug.Trace(trace)
+import Data.MemoTrie(memo2)
 
 parseLine :: Parser ([Char], [Int])
 parseLine = (,) <$> (T.unpack <$> takeTill (isSpace)) <* skipSpace <*> decimal `sepBy` ","
@@ -93,8 +92,6 @@ stillBadpart2 input = sum $ fmap extrapolateIfPossible input
         in if oneExpansionCount `mod` unexpandedCount == 0
             then (oneExpansionCount `div` unexpandedCount) ^ 4 * unexpandedCount
             else uncurry countArrangements' $ expandFiveTimes (str, counts)
-    countsUnexpanded = fmap (uncurry countArrangements') input
-    countsOneExpansion = fmap (uncurry countArrangements' . expandOnce) input
     expandOnce (str, counts) = (intercalate "?" $ replicate 2 str, concat $ replicate 2 counts)
     expandFiveTimes (str, counts) = (intercalate "?" $ replicate 5 str, concat $ replicate 5 counts)
 
@@ -133,21 +130,25 @@ choose n k
 
 countArrangements'' :: [Char] -> [Int] -> Int
 countArrangements'' str counts = case break (\c -> c == '.' || c == '#') str of
-    (leadingQs, []) -> (length str - sum counts + 1) `choose` length counts 
+    (_, []) -> (length str - sum counts + 1) `choose` length counts 
     (leadingQs, ('.':rest)) -> sum 
                              $ fmap (\(left, right) -> (length leadingQs - sum left + 1) `choose` length left
-                                                     * countArrangements'' rest right) 
+                                                     * memoCountArrangements rest right) 
                              $ filter (\(left, right) -> sum left + length left - 1 <= length leadingQs
                                                       && sum right + length right - 1 <= length rest)
                              $ zip (inits counts) (tails counts)
     (leadingQs, ('#':rest)) -> sum 
-                             $ fmap (\(remainLeft, remainRight)-> uncurry countArrangements'' remainLeft
-                                                                * uncurry countArrangements'' remainRight) 
+                             $ fmap (\(remainLeft, remainRight)-> uncurry memoCountArrangements remainLeft
+                                                                * uncurry memoCountArrangements remainRight) 
                              $ concatMap (possiblePlacements leadingQs rest) 
                              $ splitInThree counts
   where
     splitInThree :: [Int] -> [([Int], Int, [Int])]
     splitInThree groups = zip3 (inits groups) groups (drop 1 $ tails groups)
+
+-- memoize our function, dropping the runtime from ~28 seconds to ~5 seconds
+memoCountArrangements :: [Char] -> [Int] -> Int
+memoCountArrangements = memo2 countArrangements''
 
 possiblePlacements :: [Char] -> [Char] -> ([Int], Int, [Int]) -> [(([Char], [Int]), ([Char], [Int]))]
 possiblePlacements leftStr rightStr (leftCounts, groupToPlace, rightCounts) = 
@@ -157,9 +158,7 @@ possiblePlacements leftStr rightStr (leftCounts, groupToPlace, rightCounts) =
     
 canPlace :: [Char] -> [Char] -> [Int] -> [Int] -> Int -> Int -> Bool
 canPlace leftStr rightStr leftCounts rightCounts groupToPlace index =
-    let rightCharsLeft = drop index rightStr
-        leftCharsLeft = reverse $ drop (groupToPlace - index - 1) leftStr
-    in sum leftCounts + length leftCounts - 1 <= length leftStr - (groupToPlace - index - 1) - 1 
+       sum leftCounts + length leftCounts - 1 <= length leftStr - (groupToPlace - index - 1) - 1 
     && sum rightCounts + length rightCounts - 1 <= length rightStr - index - 1
     && all (/= '.') (take index rightStr)
     && all (/= '#') (take 1 $ drop index rightStr)
@@ -167,7 +166,7 @@ canPlace leftStr rightStr leftCounts rightCounts groupToPlace index =
     && all (/= '#') (take 1 $ drop (groupToPlace - index - 1) (reverse leftStr))
 
 part2 :: [([Char], [Int])] -> Int
-part2 = sum . fmap (uncurry countArrangements'' . expandFiveTimes)
+part2 = sum . fmap (uncurry memoCountArrangements . expandFiveTimes)
   where
     expandFiveTimes (str, counts) = (intercalate "?" $ replicate 5 str, concat $ replicate 5 counts)
 
@@ -179,8 +178,4 @@ main :: IO ()
 main = do
     input <- readInput
     putStrLn $ "Part 1 Solution: " ++ show (part1 input)
-    p2Solution <- forM (zip [0..] $ splitEvery 10 input) $ \(n, inputSection) -> do
-        putStrLn $ show n ++ "% Complete"
-        let !sectionSum = part2 inputSection  
-        pure sectionSum
-    putStrLn $ "Part 2 Solution: " ++ show (sum p2Solution)
+    putStrLn $ "Part 2 Solution: " ++ show (part2 input)
