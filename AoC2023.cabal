@@ -141,3 +141,11 @@ executable Day13
         containers,
         attoparsec,
         text
+
+executable Day15
+    import: day
+    main-is: Day15.hs
+    build-depends:
+        text,
+        attoparsec,
+        containers
